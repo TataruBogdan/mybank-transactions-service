@@ -8,10 +8,10 @@
 		<version>2.5.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>bogdan.learning</groupId>
-	<artifactId>mybank</artifactId>
+	<groupId>com.mybank</groupId>
+	<artifactId>mybank-transactions-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>mybank</name>
+	<name>mybank-transactions-service</name>
 	<description>Bank Application</description>
 	<properties>
 		<java.version>11</java.version>
