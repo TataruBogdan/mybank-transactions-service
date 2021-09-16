@@ -60,8 +60,6 @@
 			<version>1.4.2.Final</version>
 		</dependency>
 
-
-
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -79,6 +77,13 @@
             <groupId>org.springframework.hateoas</groupId>
             <artifactId>spring-hateoas</artifactId>
         </dependency>
+
+		<dependency>
+			<groupId>com.mybank</groupId>
+			<artifactId>mybank-commons</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
     </dependencies>
 
 
