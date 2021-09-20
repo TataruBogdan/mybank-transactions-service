@@ -1,6 +1,8 @@
 package banking.transactions.model;
 
 
+import banking.commons.transactions.model.AccountType;
+import banking.commons.transactions.model.TransactionStatus;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 

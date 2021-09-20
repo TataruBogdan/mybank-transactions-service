@@ -2,9 +2,9 @@ package banking.transactions;
 
 
 import banking.transactions.dao.TransactionRepository;
-import banking.transactions.model.AccountType;
+import banking.commons.transactions.model.AccountType;
 import banking.transactions.model.Transaction;
-import banking.transactions.model.TransactionStatus;
+import banking.commons.transactions.model.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
