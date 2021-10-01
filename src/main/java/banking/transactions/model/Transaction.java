@@ -1,9 +1,8 @@
 package banking.transactions.model;
 
 
-import banking.commons.transactions.model.AccountType;
-import banking.commons.transactions.model.TransactionStatus;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -12,12 +11,13 @@ import java.util.Date;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 public class Transaction {
 
-    //todo - insert field in database
+    //TODO - insert field in database
     @Id
-    @Column(name = "transaction_id", nullable = false)
-    private Integer transactionId;
+    @Column(name = "transaction_id")
+    private String transactionId;
 
     private String fromIban;
 
@@ -29,13 +29,14 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private AccountType toAccountType;
 
-    private Integer transactionAmount;
+    private Double transactionAmount;
 
     @Column(name = "transaction_timestamp")
     private Date transactionTime;
 
 
     @Enumerated(EnumType.STRING)
-    private TransactionStatus taxOperationType;
+    @Column(name = "transaction_status")
+    private TransactionStatus status;
 
 }
