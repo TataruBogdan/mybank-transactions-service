@@ -1,4 +1,4 @@
-package banking.transactions.idGen;
+package banking.transactions.idgen;
 
 import java.util.Random;
 

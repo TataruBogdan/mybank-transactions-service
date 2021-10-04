@@ -1,6 +1,6 @@
 package banking.transactions.service;
 
-import banking.transactions.dto.TransactionDTO;
+import banking.commons.dto.TransactionDTO;
 
 public interface TransactionService {
 

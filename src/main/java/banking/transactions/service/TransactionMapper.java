@@ -1,7 +1,7 @@
 package banking.transactions.service;
 
 
-import banking.transactions.dto.TransactionDTO;
+import banking.commons.dto.TransactionDTO;
 import banking.transactions.model.Transaction;
 import org.mapstruct.Mapper;
 

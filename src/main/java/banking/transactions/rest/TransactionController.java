@@ -1,9 +1,11 @@
 package banking.transactions.rest;
 
 
+import banking.commons.dto.AccountCurrentDTO;
 import banking.commons.dto.IndividualDTO;
+import banking.commons.dto.TransactionDTO;
 import banking.transactions.dto.AmountDTO;
-import banking.transactions.dto.TransactionDTO;
+import banking.transactions.idgen.ParseIBAN;
 import banking.transactions.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +22,11 @@ public class TransactionController {
     @Autowired
     private TransactionService transactionService;
 
+    @Autowired
+    private RestClient individualRestClient;
 
     @Autowired
-    private IndividualRestClient individualRestClient;
+    private RestClient accountCurrentDTORestClient;
 
     @PostMapping(value = "/fromIban/{fromIban}/toIban/{toIban}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<TransactionDTO> createTransaction(@PathVariable("fromIban") String fromIban,
@@ -31,17 +35,31 @@ public class TransactionController {
 
         TransactionDTO transaction = transactionService.createTransaction(fromIban, toIban, amount.getAmount());
 
-        //not working - cannot
-        IndividualDTO fromIndividualById = individualRestClient.getIndividualById(transaction.getFromIndividualId());
-        IndividualDTO toIndividualById = individualRestClient.getIndividualById(transaction.getToIndividualId());
+        AccountCurrentDTO accountCurrentFromByIban = accountCurrentDTORestClient.getAccountCurrentByIban(fromIban);
+        AccountCurrentDTO accountCurrentToByIban = accountCurrentDTORestClient.getAccountCurrentByIban(toIban);
+
+        IndividualDTO fromIndividualById = individualRestClient.getIndividualById(accountCurrentFromByIban.getIndividualId());
+        IndividualDTO toIndividualById = individualRestClient.getIndividualById(accountCurrentToByIban.getIndividualId());
+        transaction.setFromIban(accountCurrentFromByIban.getIban());
+        transaction.setToIban(accountCurrentToByIban.getIban());
         transaction.setFromIndividualDTO(fromIndividualById);
         transaction.setToIndividualDTO(toIndividualById);
+        transaction.setFromIndividualId(accountCurrentFromByIban.getIndividualId());
+        transaction.setToIndividualId(accountCurrentToByIban.getIndividualId());
+
+        String accountFromIban = accountCurrentFromByIban.getIban();
+        String accountToIban = accountCurrentToByIban.getIban();
+
+        ParseIBAN.parseFromStringIban(accountFromIban, transaction);
+        ParseIBAN.parseToStringIban(accountToIban, transaction);
 
         return ResponseEntity.ok(transaction);
     }
 
 
-//    public ResponseEntity<>
+
+
+
 
 
 

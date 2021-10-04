@@ -2,7 +2,8 @@ package banking.transactions.service.impl;
 
 
 import banking.transactions.dao.TransactionRepository;
-import banking.transactions.dto.TransactionDTO;
+import banking.commons.dto.TransactionDTO;
+import banking.transactions.idgen.ParseIBAN;
 import banking.transactions.model.Transaction;
 import banking.transactions.service.TransactionMapper;
 import banking.transactions.service.TransactionService;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.UUID;
 
-import static banking.transactions.model.TransactionStatus.NEW;
+import static banking.commons.dto.types.TransactionStatus.NEW;
 
 @RequiredArgsConstructor
 @Service
@@ -31,10 +32,10 @@ public class TransactionServiceImpl implements TransactionService {
                                             double amount) {
         Transaction transaction = new Transaction();
         transaction.setTransactionId(UUID.randomUUID().toString());
+        ParseIBAN.parseFromStringIban(fromIban,transaction);
         transaction.setFromIban(fromIban);
-        transaction.setFromAccountType(transaction.getFromAccountType());
         transaction.setToIban(toIban);
-        transaction.setToAccountType(transaction.getToAccountType());
+        ParseIBAN.parseToStringIban(toIban, transaction);
         transaction.setTransactionAmount(amount);
         transaction.setTransactionTime(new Date());
         transaction.setStatus(NEW);
