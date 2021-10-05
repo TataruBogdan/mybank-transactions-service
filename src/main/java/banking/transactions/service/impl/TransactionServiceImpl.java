@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 import static banking.commons.dto.types.TransactionStatus.NEW;
@@ -46,10 +47,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionDTO findTransactionByFromAndTo(String fromIban, String toIban) {
+    public Optional<TransactionDTO> getTransactionById(String transactionId) {
+        return transactionRepository.findById(transactionId)
+                .map(transaction -> transactionMapper.transactionToDTO(transaction));
 
-        TransactionDTO transactionByFromIbanAndToIban = transactionRepository.findByFromIbanAndToIban(fromIban, toIban);
-        return transactionByFromIbanAndToIban;
+
     }
+
 
 }

@@ -13,6 +13,7 @@ public class RestClient {
     @Autowired
     private RestTemplate restTemplate;
 
+
     public IndividualDTO getIndividualById(Integer id){
 
         IndividualDTO individualDTO = restTemplate.getForObject("http://localhost:8100/individuals/" + id, IndividualDTO.class);
