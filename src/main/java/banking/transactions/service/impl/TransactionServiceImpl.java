@@ -1,21 +1,21 @@
 package banking.transactions.service.impl;
 
 
-import banking.transactions.dao.TransactionRepository;
 import banking.commons.dto.TransactionDTO;
-import banking.transactions.idgen.ParseIBAN;
+import banking.transactions.dao.TransactionRepository;
 import banking.transactions.model.Transaction;
+import banking.transactions.model.TransactionStatus;
 import banking.transactions.service.TransactionMapper;
 import banking.transactions.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static banking.commons.dto.types.TransactionStatus.NEW;
+import static banking.transactions.idgen.IbanUtils.parseTypeStringIban;
 
 @RequiredArgsConstructor
 @Service
@@ -28,18 +28,19 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionMapper transactionMapper;
 
 
+
     @Override
     public TransactionDTO createTransaction(String fromIban, String toIban,
                                             double amount) {
         Transaction transaction = new Transaction();
         transaction.setTransactionId(UUID.randomUUID().toString());
-        ParseIBAN.parseFromStringIban(fromIban,transaction);
         transaction.setFromIban(fromIban);
+        transaction.setFromAccountType(parseTypeStringIban(fromIban));
         transaction.setToIban(toIban);
-        ParseIBAN.parseToStringIban(toIban, transaction);
+        transaction.setToAccountType(parseTypeStringIban(toIban));
         transaction.setTransactionAmount(amount);
-        transaction.setTransactionTime(new Date());
-        transaction.setStatus(NEW);
+        transaction.setTransactionTime(LocalDateTime.now());
+        transaction.setStatus(TransactionStatus.NEW);
 
         Transaction savedTransaction = transactionRepository.save(transaction);
         return transactionMapper.transactionToDTO(savedTransaction);

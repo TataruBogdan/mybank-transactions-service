@@ -1,12 +1,12 @@
 package banking.transactions.model;
+
 import banking.commons.dto.types.AccountType;
-import banking.commons.dto.types.TransactionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @AllArgsConstructor
@@ -32,7 +32,7 @@ public class Transaction {
     private Double transactionAmount;
 
     @Column(name = "transaction_timestamp")
-    private Date transactionTime;
+    private LocalDateTime transactionTime;
 
 
     @Enumerated(EnumType.STRING)

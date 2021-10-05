@@ -1,9 +1,12 @@
 package banking.transactions.rest;
 
 
-import banking.commons.dto.AccountCurrentDTO;
-import banking.commons.dto.TransactionDTO;
+import banking.commons.dto.*;
 import banking.transactions.dto.AmountDTO;
+import banking.transactions.rest.client.AccountCurrentRestClient;
+import banking.transactions.rest.client.AccountDepositRestClient;
+import banking.transactions.rest.client.AccountIndividualRestClient;
+import banking.transactions.rest.client.AccountLoanRestClient;
 import banking.transactions.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +26,16 @@ public class TransactionController {
     private TransactionService transactionService;
 
     @Autowired
-    private RestClient restClient;
+    private AccountCurrentRestClient accountCurrentRestClient;
+
+    @Autowired
+    private AccountIndividualRestClient accountIndividualRestClient;
+
+    @Autowired
+    private AccountDepositRestClient accountDepositRestClient;
+
+    @Autowired
+    private AccountLoanRestClient accountLoanRestClient;
 
     @PostMapping(value = "/fromIban/{fromIban}/toIban/{toIban}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<TransactionDTO> createTransaction(@PathVariable("fromIban") String fromIban,
@@ -33,34 +45,47 @@ public class TransactionController {
         TransactionDTO transaction = transactionService.createTransaction(fromIban, toIban, amount.getAmount());
 
         //HARD CODDED - check to witch account type IBAN belongs
-        AccountCurrentDTO accountCurrentFromByIban = restClient.getAccountCurrentByIban(fromIban);
-        AccountCurrentDTO accountCurrentToByIban = restClient.getAccountCurrentByIban(toIban);
+        //TODO - need to check the IBAN and see what kind of IBAN is then pass it to transaction and save it
+        //TODO String microservice = transaction.getFromAccountType().getMicroservice();
 
-        transaction.setToIban(accountCurrentToByIban.getIban());
-        transaction.setFromIban(accountCurrentFromByIban.getIban());
+        IndividualDTO  fromIndividualDTO = null;
 
-        transaction.setToIndividualId(accountCurrentToByIban.getIndividualId());
-        transaction.setFromIndividualId(accountCurrentFromByIban.getIndividualId());
-
-        transaction.setToIndividualDTO(accountCurrentToByIban.getIndividual());
-        transaction.setFromIndividualDTO(accountCurrentFromByIban.getIndividual());
+        switch (transaction.getFromAccountType()){
+            case CURRENT: {
+                AccountCurrentDTO accountFromByIban = accountCurrentRestClient.getAccountCurrentByIban(fromIban);
+                fromIndividualDTO = accountFromByIban.getIndividual();
+                break;
+            }
+            case LOAN: {
+                AccountLoanDTO accountLoanByIban = accountLoanRestClient.getAccountLoanByIban(fromIban);
+                fromIndividualDTO = accountLoanByIban.getIndividualDTO();
+            }
+            case DEPOSIT: {
+                AccountDepositDTO accountDepositByIban = accountDepositRestClient.getAccountDepositByIban(fromIban);
+                fromIndividualDTO = accountDepositByIban.getIndividual();
+            }
+        }
 
         return ResponseEntity.ok(transaction);
     }
 
 
+    //TODO this will be send to account service
     @GetMapping("/{transactionId}")
     public ResponseEntity<TransactionDTO> retrieveTransaction(@PathVariable("transactionId") String transactionId) {
 
         Optional<TransactionDTO> transactionByIBAN = transactionService.getTransactionById(transactionId);
 
         if (transactionByIBAN.isPresent()) {
+            // TODO - TREBUIE SA VERIFIC CE FEL DE CONT ESTE CEL DIN TRANZACTIE : CURR, DEP, LOAN
+            //TODO - SI APOI SA APELEZ SERVICIUL CORESPUNZATOR
 
-            AccountCurrentDTO accountCurrentToByIban = restClient.getAccountCurrentByIban(transactionByIBAN.get().getToIban());
-            AccountCurrentDTO accountCurrentFromByIban = restClient.getAccountCurrentByIban(transactionByIBAN.get().getFromIban());
+            AccountCurrentDTO accountCurrentFromByIban = accountCurrentRestClient.getAccountCurrentByIban(transactionByIBAN.get().getFromIban());
+            AccountCurrentDTO accountCurrentToByIban = accountCurrentRestClient.getAccountCurrentByIban(transactionByIBAN.get().getToIban());
 
-            transactionByIBAN.get().setToIndividualId(accountCurrentToByIban.getIndividualId());
-            transactionByIBAN.get().setFromIndividualId(accountCurrentFromByIban.getIndividualId());
+
+//            transactionByIBAN.get().setToIndividualId(accountCurrentToByIban.getIndividualId());
+//            transactionByIBAN.get().setFromIndividualId(accountCurrentFromByIban.getIndividualId());
 
             transactionByIBAN.get().setToIndividualDTO(accountCurrentToByIban.getIndividual());
             transactionByIBAN.get().setFromIndividualDTO(accountCurrentFromByIban.getIndividual());
@@ -70,5 +95,24 @@ public class TransactionController {
             return ResponseEntity.notFound().build();
         }
     }
+
+//    @GetMapping("/individual/{individualId}")
+//    public ResponseEntity<List<TransactionDTO>> retrieveAllTransactionIndividualID(@PathVariable("individualId") int individualId){
+//
+//        List<TransactionDTO> transactionByIndividualId = transactionService.findByToIndividualId(individualId);
+//
+//        if (transactionByIndividualId.isEmpty()){
+//            return ResponseEntity.notFound().build();
+//        }
+//
+//        IndividualDTO individualById = restClient.getIndividualById(individualId);
+//        for (TransactionDTO transactionDTO : transactionByIndividualId){
+//            transactionDTO.setFromIndividualDTO(individualById);
+//            transactionDTO.setToIndividualDTO(individualById);
+//        }
+//
+//        return ResponseEntity.ok(transactionByIndividualId);
+//
+//    }
 
 }

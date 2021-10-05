@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TransactionRepository  extends JpaRepository<Transaction, String> {
 
+//    List<Transaction> findByIndividualId(int individualId);
 
     TransactionDTO findByFromIbanAndToIban(String fromIban, String toIban);
 
