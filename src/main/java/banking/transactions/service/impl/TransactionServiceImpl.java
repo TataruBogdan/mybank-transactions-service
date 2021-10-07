@@ -27,8 +27,6 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private final TransactionMapper transactionMapper;
 
-
-
     @Override
     public TransactionDTO createTransaction(String fromIban, String toIban,
                                             double amount) {
@@ -44,16 +42,11 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction savedTransaction = transactionRepository.save(transaction);
         return transactionMapper.transactionToDTO(savedTransaction);
-
     }
 
     @Override
     public Optional<TransactionDTO> getTransactionById(String transactionId) {
         return transactionRepository.findById(transactionId)
                 .map(transaction -> transactionMapper.transactionToDTO(transaction));
-
-
     }
-
-
 }

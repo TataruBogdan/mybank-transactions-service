@@ -44,11 +44,11 @@ public class TransactionController {
 
         TransactionDTO transaction = transactionService.createTransaction(fromIban, toIban, amount.getAmount());
 
-        //HARD CODDED - check to witch account type IBAN belongs
         //TODO - need to check the IBAN and see what kind of IBAN is then pass it to transaction and save it
         //TODO String microservice = transaction.getFromAccountType().getMicroservice();
 
-        IndividualDTO  fromIndividualDTO = null;
+        IndividualDTO fromIndividualDTO = null;
+        IndividualDTO toIndividualDTO = null;
 
         switch (transaction.getFromAccountType()){
             case CURRENT: {
@@ -59,13 +59,35 @@ public class TransactionController {
             case LOAN: {
                 AccountLoanDTO accountLoanByIban = accountLoanRestClient.getAccountLoanByIban(fromIban);
                 fromIndividualDTO = accountLoanByIban.getIndividualDTO();
+                break;
             }
             case DEPOSIT: {
                 AccountDepositDTO accountDepositByIban = accountDepositRestClient.getAccountDepositByIban(fromIban);
                 fromIndividualDTO = accountDepositByIban.getIndividual();
+                break;
             }
         }
+        transaction.setFromIndividualDTO(fromIndividualDTO);
 
+
+        switch ((transaction.getToAccountType())){
+            case CURRENT: {
+                AccountCurrentDTO accountCurrentByIban = accountCurrentRestClient.getAccountCurrentByIban(toIban);
+                toIndividualDTO = accountCurrentByIban.getIndividual();
+                break;
+            }
+            case LOAN: {
+                AccountLoanDTO accountLoanByIban = accountLoanRestClient.getAccountLoanByIban(toIban);
+                toIndividualDTO = accountLoanByIban.getIndividualDTO();
+                break;
+            }
+            case DEPOSIT: {
+                AccountDepositDTO accountDepositByIban = accountDepositRestClient.getAccountDepositByIban(toIban);
+                toIndividualDTO = accountDepositByIban.getIndividual();
+                break;
+            }
+        }
+        transaction.setToIndividualDTO(toIndividualDTO);
         return ResponseEntity.ok(transaction);
     }
 
@@ -81,38 +103,19 @@ public class TransactionController {
             //TODO - SI APOI SA APELEZ SERVICIUL CORESPUNZATOR
 
             AccountCurrentDTO accountCurrentFromByIban = accountCurrentRestClient.getAccountCurrentByIban(transactionByIBAN.get().getFromIban());
-            AccountCurrentDTO accountCurrentToByIban = accountCurrentRestClient.getAccountCurrentByIban(transactionByIBAN.get().getToIban());
+//            AccountCurrentDTO accountCurrentToByIban = accountCurrentRestClient.getAccountCurrentByIban(transactionByIBAN.get().getToIban());
 
 
 //            transactionByIBAN.get().setToIndividualId(accountCurrentToByIban.getIndividualId());
 //            transactionByIBAN.get().setFromIndividualId(accountCurrentFromByIban.getIndividualId());
 
-            transactionByIBAN.get().setToIndividualDTO(accountCurrentToByIban.getIndividual());
             transactionByIBAN.get().setFromIndividualDTO(accountCurrentFromByIban.getIndividual());
+//            transactionByIBAN.get().setToIndividualDTO(accountCurrentToByIban.getIndividual());
+
 
             return ResponseEntity.ok(transactionByIBAN.get());
         } else {
             return ResponseEntity.notFound().build();
         }
     }
-
-//    @GetMapping("/individual/{individualId}")
-//    public ResponseEntity<List<TransactionDTO>> retrieveAllTransactionIndividualID(@PathVariable("individualId") int individualId){
-//
-//        List<TransactionDTO> transactionByIndividualId = transactionService.findByToIndividualId(individualId);
-//
-//        if (transactionByIndividualId.isEmpty()){
-//            return ResponseEntity.notFound().build();
-//        }
-//
-//        IndividualDTO individualById = restClient.getIndividualById(individualId);
-//        for (TransactionDTO transactionDTO : transactionByIndividualId){
-//            transactionDTO.setFromIndividualDTO(individualById);
-//            transactionDTO.setToIndividualDTO(individualById);
-//        }
-//
-//        return ResponseEntity.ok(transactionByIndividualId);
-//
-//    }
-
 }

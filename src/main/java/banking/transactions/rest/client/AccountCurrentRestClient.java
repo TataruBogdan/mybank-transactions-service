@@ -12,10 +12,10 @@ import org.springframework.web.client.RestTemplate;
 public class AccountCurrentRestClient {
 
     @Autowired
-    private RestTemplate restTemplate;
+    private RestTemplate currentRestTemplate;
 
     public AccountCurrentDTO getAccountCurrentByIban(String iban){
-        AccountCurrentDTO accountCurrentDTO = restTemplate.getForObject("http://localhost:8200/accounts-current/" + iban, AccountCurrentDTO.class);
+        AccountCurrentDTO accountCurrentDTO = currentRestTemplate.getForObject("http://localhost:8200/accounts-current/" + iban, AccountCurrentDTO.class);
 
         return accountCurrentDTO;
     }

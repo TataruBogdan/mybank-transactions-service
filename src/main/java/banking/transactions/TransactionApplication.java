@@ -4,6 +4,7 @@ package banking.transactions;
 import banking.transactions.dao.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,6 +18,7 @@ public class TransactionApplication implements CommandLineRunner {
         SpringApplication.run(TransactionApplication.class, args);
     }
 
+    @Autowired
     private TransactionRepository transactionRepository;
 
 
