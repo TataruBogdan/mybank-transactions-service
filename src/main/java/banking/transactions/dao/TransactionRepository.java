@@ -1,6 +1,7 @@
 package banking.transactions.dao;
 
 import banking.commons.dto.TransactionDTO;
+import banking.commons.dto.types.AccountType;
 import banking.transactions.model.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -10,7 +11,10 @@ public interface TransactionRepository  extends JpaRepository<Transaction, Strin
 
 //    List<Transaction> findByIndividualId(int individualId);
 
-    TransactionDTO findByFromIbanAndToIban(String fromIban, String toIban);
+                                        //Change from String
+    TransactionDTO findByFromIbanAndToIban(AccountType fromIban, AccountType toIban);
+
+
 
 
 }

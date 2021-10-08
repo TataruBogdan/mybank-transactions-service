@@ -8,6 +8,7 @@
 		<version>2.5.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+
 	<groupId>com.mybank</groupId>
 	<artifactId>mybank-transactions-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -27,6 +28,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -85,8 +87,4 @@
 		</dependency>
 
     </dependencies>
-
-
-
-
 </project>

@@ -1,6 +1,5 @@
 package banking.transactions.rest;
 
-
 import banking.commons.dto.*;
 import banking.transactions.dto.AmountDTO;
 import banking.transactions.rest.client.AccountCurrentRestClient;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+import static banking.transactions.idgen.IbanUtils.parseTypeStringIban;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RequiredArgsConstructor
@@ -39,21 +39,16 @@ public class TransactionController {
 
     @PostMapping(value = "/fromIban/{fromIban}/toIban/{toIban}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<TransactionDTO> createTransaction(@PathVariable("fromIban") String fromIban,
-                                                            @PathVariable("toIban") String toIban,
-                                                            @RequestBody AmountDTO amount) {
-
-        TransactionDTO transaction = transactionService.createTransaction(fromIban, toIban, amount.getAmount());
-
-        //TODO - need to check the IBAN and see what kind of IBAN is then pass it to transaction and save it
-        //TODO String microservice = transaction.getFromAccountType().getMicroservice();
+                                                         @PathVariable("toIban") String toIban,
+                                                         @RequestBody AmountDTO amount) {
 
         IndividualDTO fromIndividualDTO = null;
         IndividualDTO toIndividualDTO = null;
 
-        switch (transaction.getFromAccountType()){
+        switch (parseTypeStringIban(fromIban)){
             case CURRENT: {
-                AccountCurrentDTO accountFromByIban = accountCurrentRestClient.getAccountCurrentByIban(fromIban);
-                fromIndividualDTO = accountFromByIban.getIndividual();
+                AccountCurrentDTO accountCurrentFromByIban = accountCurrentRestClient.getAccountCurrentByIban(fromIban);
+                fromIndividualDTO = accountCurrentFromByIban.getIndividual();
                 break;
             }
             case LOAN: {
@@ -67,10 +62,7 @@ public class TransactionController {
                 break;
             }
         }
-        transaction.setFromIndividualDTO(fromIndividualDTO);
-
-
-        switch ((transaction.getToAccountType())){
+        switch (parseTypeStringIban(toIban)){
             case CURRENT: {
                 AccountCurrentDTO accountCurrentByIban = accountCurrentRestClient.getAccountCurrentByIban(toIban);
                 toIndividualDTO = accountCurrentByIban.getIndividual();
@@ -87,6 +79,9 @@ public class TransactionController {
                 break;
             }
         }
+
+        TransactionDTO transaction = transactionService.createTransaction(fromIban, toIban, fromIndividualDTO.getId(), toIndividualDTO.getId(), amount.getAmount());
+        transaction.setFromIndividualDTO(fromIndividualDTO);
         transaction.setToIndividualDTO(toIndividualDTO);
         return ResponseEntity.ok(transaction);
     }
@@ -103,14 +98,12 @@ public class TransactionController {
             //TODO - SI APOI SA APELEZ SERVICIUL CORESPUNZATOR
 
             AccountCurrentDTO accountCurrentFromByIban = accountCurrentRestClient.getAccountCurrentByIban(transactionByIBAN.get().getFromIban());
-//            AccountCurrentDTO accountCurrentToByIban = accountCurrentRestClient.getAccountCurrentByIban(transactionByIBAN.get().getToIban());
+            AccountCurrentDTO accountCurrentToByIban = accountCurrentRestClient.getAccountCurrentByIban(transactionByIBAN.get().getToIban());
 
 
-//            transactionByIBAN.get().setToIndividualId(accountCurrentToByIban.getIndividualId());
-//            transactionByIBAN.get().setFromIndividualId(accountCurrentFromByIban.getIndividualId());
 
             transactionByIBAN.get().setFromIndividualDTO(accountCurrentFromByIban.getIndividual());
-//            transactionByIBAN.get().setToIndividualDTO(accountCurrentToByIban.getIndividual());
+            transactionByIBAN.get().setToIndividualDTO(accountCurrentToByIban.getIndividual());
 
 
             return ResponseEntity.ok(transactionByIBAN.get());

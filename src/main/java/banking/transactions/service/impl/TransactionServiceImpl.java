@@ -28,7 +28,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionMapper transactionMapper;
 
     @Override
-    public TransactionDTO createTransaction(String fromIban, String toIban,
+    public TransactionDTO createTransaction(String fromIban, String toIban, Integer fromId, Integer toId,
                                             double amount) {
         Transaction transaction = new Transaction();
         transaction.setTransactionId(UUID.randomUUID().toString());
@@ -39,7 +39,8 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setTransactionAmount(amount);
         transaction.setTransactionTime(LocalDateTime.now());
         transaction.setStatus(TransactionStatus.NEW);
-
+        transaction.setFromIndividualId(fromId);
+        transaction.setToIndividualId(toId);
         Transaction savedTransaction = transactionRepository.save(transaction);
         return transactionMapper.transactionToDTO(savedTransaction);
     }
