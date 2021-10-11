@@ -22,6 +22,7 @@ spring:
 rest-client:
   accounts-loan-url: http://localhost:8400/accounts-loan
   accounts-current-url: http://localhost:8200/accounts-current/
+# accounts-current-debit-url: http://http://localhost:8200/accounts-current/debit/
   accounts-deposit-url: http://localhost:8300/accounts-deposit/
   individual-url: http://localhost:8100/individuals/
 

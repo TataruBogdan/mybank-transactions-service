@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+//all rest clients must have URL and path in application yaml
+//create in application.yaml a configuration rest-client - URL resource for each application
+
 @Service
 public class AccountDepositRestClient {
 
