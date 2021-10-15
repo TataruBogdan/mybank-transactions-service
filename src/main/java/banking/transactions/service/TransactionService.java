@@ -2,6 +2,7 @@ package banking.transactions.service;
 
 import banking.commons.dto.TransactionDTO;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TransactionService {
@@ -12,5 +13,9 @@ public interface TransactionService {
                                             double amount);
 
     Optional<TransactionDTO> getTransactionById(String transactionId);
+
+    List<TransactionDTO> getAllTransactions();
+
+
 
 }

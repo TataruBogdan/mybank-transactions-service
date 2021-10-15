@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -49,5 +50,12 @@ public class TransactionServiceImpl implements TransactionService {
     public Optional<TransactionDTO> getTransactionById(String transactionId) {
         return transactionRepository.findById(transactionId)
                 .map(transaction -> transactionMapper.transactionToDTO(transaction));
+    }
+
+    @Override
+    public List<TransactionDTO> getAllTransactions() {
+        List<Transaction> allTransactions = transactionRepository.findAll();
+        List<TransactionDTO> transactionDTOS = transactionMapper.listTransactionsDTO(allTransactions);
+        return transactionDTOS;
     }
 }
