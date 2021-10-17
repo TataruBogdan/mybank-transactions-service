@@ -2,9 +2,9 @@ package banking.transactions.service.impl;
 
 
 import banking.commons.dto.TransactionDTO;
+import banking.commons.dto.types.TransactionStatus;
 import banking.transactions.dao.TransactionRepository;
 import banking.transactions.model.Transaction;
-import banking.transactions.model.TransactionStatus;
 import banking.transactions.service.TransactionMapper;
 import banking.transactions.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static banking.transactions.idgen.IbanUtils.parseTypeStringIban;
 
@@ -53,9 +54,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<TransactionDTO> getAllTransactions() {
-        List<Transaction> allTransactions = transactionRepository.findAll();
-        List<TransactionDTO> transactionDTOS = transactionMapper.listTransactionsDTO(allTransactions);
-        return transactionDTOS;
+    public List<TransactionDTO> getAllTransactionsFindByTransactionsStatus(List<TransactionStatus> statuses) {
+
+        List<String> enumStatus = statuses.stream().map(Enum::toString).collect(Collectors.toList());
+
+        List<Transaction> transactionsByStatus = transactionRepository.findTransactionByTransactionStatusList(enumStatus);
+        return transactionMapper.listTransactionsDTO(transactionsByStatus);
+
     }
+
 }

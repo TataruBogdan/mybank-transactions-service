@@ -1,6 +1,7 @@
 package banking.transactions.model;
 
 import banking.commons.dto.types.AccountType;
+import banking.commons.dto.types.TransactionStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;

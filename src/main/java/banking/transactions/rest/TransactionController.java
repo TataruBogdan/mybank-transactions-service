@@ -9,6 +9,7 @@ import banking.transactions.rest.client.AccountLoanRestClient;
 import banking.transactions.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -116,24 +117,29 @@ public class TransactionController {
 //    }
 
     //return only id transaction with status
-    @GetMapping("/search-by-status")
-    public ResponseEntity<List<String>> getAllTransactionsWithStatus(@RequestBody List<TransactionStatus> statuses) {
-        List<TransactionDTO> allTransactionsDTOS = transactionService.getAllTransactions();
+    @GetMapping(value = "/search-by-status", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<String>> getAllTransactionsWithStatus(@RequestBody TransactionSearchInputDTO statuses) {
 
-        List<String> transactionIdsWithStatus = new ArrayList<>();
-        for (TransactionDTO transaction : allTransactionsDTOS) {
-            for (TransactionStatus status : statuses) {
-                if (transaction.getStatus().equals(status)) {
-                    transactionIdsWithStatus.add(transaction.getTransactionId());
-                }
-            }
+        //return list of ids of transactions with status
+        List<TransactionDTO> allTransactionsFindByStatus = transactionService.getAllTransactionsFindByTransactionsStatus(statuses.getStatusList());
+
+        List<String> transactionsWithIds = new ArrayList<>();
+
+        for (TransactionDTO transactionsIDs: allTransactionsFindByStatus) {
+            String transactionId = transactionsIDs.getTransactionId();
+            transactionsWithIds.add(transactionId);
         }
-        return ResponseEntity.ok(transactionIdsWithStatus);
+
+        if (transactionsWithIds.isEmpty()) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(allTransactionsFindByStatus);
+        }
+
+        return ResponseEntity.ok(transactionsWithIds);
     }
 
 
     //??? /transactions/transactionId ? - e ok
-    @PatchMapping("/execute/transactionId")
+    @PatchMapping("/execute/{transactionId}")
     public Optional<TransactionDTO> executeTransaction(@PathVariable("transactionId") String transactionId){
     //TODO - incarcam TransactionsDTO
         Optional<TransactionDTO> transactionById = transactionService.getTransactionById(transactionId);
@@ -154,7 +160,5 @@ public class TransactionController {
 
 
     }
-
-
 
 }

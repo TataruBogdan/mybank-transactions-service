@@ -1,6 +1,7 @@
 package banking.transactions.service;
 
 import banking.commons.dto.TransactionDTO;
+import banking.commons.dto.types.TransactionStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +15,7 @@ public interface TransactionService {
 
     Optional<TransactionDTO> getTransactionById(String transactionId);
 
-    List<TransactionDTO> getAllTransactions();
+    List<TransactionDTO> getAllTransactionsFindByTransactionsStatus(List<TransactionStatus> statuses);
 
 
 
