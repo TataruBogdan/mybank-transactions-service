@@ -20,7 +20,6 @@ spring:
     host: localhost
     port: 6379
 
-
 rest-client:
   accounts-loan-url: http://localhost:8400/accounts-loan
   accounts-current-url: http://localhost:8200/accounts-current/

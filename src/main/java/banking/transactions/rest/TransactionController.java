@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,7 +51,6 @@ public class TransactionController {
             case CURRENT: {
                 AccountCurrentDTO accountCurrentFromByIban = accountCurrentRestClient.getAccountCurrentByIban(fromIban);
                 fromIndividualDTO = accountCurrentFromByIban.getIndividual();
-                //ResponseEntity<AccountCurrentDTO> accountCurrentDTO = accountCurrentRestClient.debitAccountCurrent(fromIban, amount);
                 break;
             }
             case LOAN: {
@@ -92,73 +90,89 @@ public class TransactionController {
 
 
 //    //TODO this will be send to account service
-//    @GetMapping("/{transactionId}")
-//    public ResponseEntity<TransactionDTO> retrieveTransaction(@PathVariable("transactionId") String transactionId) {
-//
-//        Optional<TransactionDTO> transactionByIBAN = transactionService.getTransactionById(transactionId);
-//
-//        if (transactionByIBAN.isPresent()) {
-//            // TODO - TREBUIE SA VERIFIC CE FEL DE CONT ESTE CEL DIN TRANZACTIE : CURR, DEP, LOAN
-//            //TODO - SI APOI SA APELEZ SERVICIUL CORESPUNZATOR
-//
-//            AccountCurrentDTO accountCurrentFromByIban = accountCurrentRestClient.getAccountCurrentByIban(transactionByIBAN.get().getFromIban());
-//            AccountCurrentDTO accountCurrentToByIban = accountCurrentRestClient.getAccountCurrentByIban(transactionByIBAN.get().getToIban());
-//
-//
-//
-//            transactionByIBAN.get().setFromIndividualDTO(accountCurrentFromByIban.getIndividual());
-//            transactionByIBAN.get().setToIndividualDTO(accountCurrentToByIban.getIndividual());
-//
-//
-//            return ResponseEntity.ok(transactionByIBAN.get());
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
+    @GetMapping("/{transactionId}")
+    public ResponseEntity<TransactionDTO> retrieveTransaction(@PathVariable("transactionId") String transactionId) {
+
+        Optional<TransactionDTO> transactionByIBAN = transactionService.getTransactionById(transactionId);
+
+        if (transactionByIBAN.isPresent()) {
+            // TODO - TREBUIE SA VERIFIC CE FEL DE CONT ESTE CEL DIN TRANZACTIE : CURR, DEP, LOAN
+            //TODO - SI APOI SA APELEZ SERVICIUL CORESPUNZATOR
+
+            AccountCurrentDTO accountCurrentFromByIban = accountCurrentRestClient.getAccountCurrentByIban(transactionByIBAN.get().getFromIban());
+            AccountCurrentDTO accountCurrentToByIban = accountCurrentRestClient.getAccountCurrentByIban(transactionByIBAN.get().getToIban());
+
+
+
+            transactionByIBAN.get().setFromIndividualDTO(accountCurrentFromByIban.getIndividual());
+            transactionByIBAN.get().setToIndividualDTO(accountCurrentToByIban.getIndividual());
+
+
+            return ResponseEntity.ok(transactionByIBAN.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
     //return only id transaction with status
-    @GetMapping(value = "/search-by-status", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<String>> getAllTransactionsWithStatus(@RequestBody TransactionSearchInputDTO statuses) {
+    @PostMapping(value = "/search-by-status", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<SearchTransactionsResponseDTO> getAllTransactionsWithStatus(@RequestBody TransactionSearchInputDTO statuses) {
 
         //return list of ids of transactions with status
-        List<TransactionDTO> allTransactionsFindByStatus = transactionService.getAllTransactionsFindByTransactionsStatus(statuses.getStatusList());
+        List<String> allTransactionsIdsFindByTransactionsStatus = transactionService.getAllTransactionsFindByTransactionsStatus(statuses.getStatusList());
 
-        List<String> transactionsWithIds = new ArrayList<>();
+        SearchTransactionsResponseDTO searchTransactionsResponseDTO = new SearchTransactionsResponseDTO();
+        searchTransactionsResponseDTO.setIds(allTransactionsIdsFindByTransactionsStatus);
 
-        for (TransactionDTO transactionsIDs: allTransactionsFindByStatus) {
-            String transactionId = transactionsIDs.getTransactionId();
-            transactionsWithIds.add(transactionId);
+        if (searchTransactionsResponseDTO.getIds().isEmpty()) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND);
         }
 
-        if (transactionsWithIds.isEmpty()) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(allTransactionsFindByStatus);
-        }
-
-        return ResponseEntity.ok(transactionsWithIds);
+        return ResponseEntity.ok(searchTransactionsResponseDTO);
     }
 
 
     //??? /transactions/transactionId ? - e ok
-    @PatchMapping("/execute/{transactionId}")
-    public Optional<TransactionDTO> executeTransaction(@PathVariable("transactionId") String transactionId){
+    @PatchMapping(value = "/execute/{transactionId}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<TransactionDTO> executeTransaction(@PathVariable("transactionId") String transactionId){
     //TODO - incarcam TransactionsDTO
         Optional<TransactionDTO> transactionById = transactionService.getTransactionById(transactionId);
-        //debit from iban
-        String transactionFromIban = transactionById.get().getFromIban();
         Double transactionAmount = transactionById.get().getTransactionAmount();
 
-        ResponseEntity<AccountCurrentDTO> debitAccountCurrent = accountCurrentRestClient.debitAccountCurrent(transactionFromIban, transactionAmount);
+        String fromIban = transactionById.get().getFromIban();
+        String toIban = transactionById.get().getToIban();
 
-        //credit to iban
-        String transactionToIban = transactionById.get().getToIban();
-        ResponseEntity<AccountCurrentDTO> creditAccountCurrent = accountCurrentRestClient.creditAccountCurrent(transactionToIban, transactionAmount);
+        IndividualDTO fromIndividualDTO = null;
+        IndividualDTO toIndividualDTO = null;
 
-        //modificam transaction status finished
-        transactionById.get().setStatus(TransactionStatus.FINISHED);
+        switch (parseTypeStringIban(fromIban)) {
+            case CURRENT: {
+                ResponseEntity<AccountCurrentDTO> debitAccountCurrent = accountCurrentRestClient.debitAccountCurrent(fromIban, transactionAmount);
+                // este corect asa ???? de verificat !!!
+                debitAccountCurrent.getBody().setIndividual(fromIndividualDTO);
+            }
+        }
+        switch (parseTypeStringIban(toIban)) {
+            case CURRENT: {
+                ResponseEntity<AccountCurrentDTO> creditAccountCurrent = accountCurrentRestClient.creditAccountCurrent(toIban, transactionAmount);
+                creditAccountCurrent.getBody().setIndividual(toIndividualDTO);
+            }
 
-        return transactionById;
+            //can only make a new deposit that will wait x months to maturation
+            case DEPOSIT: {
+                AccountDepositDTO accountDepositByIban = accountDepositRestClient.getAccountDepositByIban(transactionId);
+                int maturityMonths = accountDepositByIban.getMaturityMonths();
+                ResponseEntity<AccountDepositDTO> newAccountDepositForIndividual = accountDepositRestClient.createNewAccountDepositForIndividual(toIndividualDTO, maturityMonths, transactionAmount);
 
+            }
+        }
 
+        if (transactionById.isPresent()) {
+           //modificam transaction status finished
+           transactionById.get().setStatus(TransactionStatus.FINISHED);
+            return ResponseEntity.status(HttpStatus.OK).body(transactionById.get());
+       }
+       return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
 }

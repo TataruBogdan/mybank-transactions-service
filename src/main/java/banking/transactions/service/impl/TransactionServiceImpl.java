@@ -54,13 +54,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<TransactionDTO> getAllTransactionsFindByTransactionsStatus(List<TransactionStatus> statuses) {
+    public List<String> getAllTransactionsFindByTransactionsStatus(List<TransactionStatus> statuses) {
 
         List<String> enumStatus = statuses.stream().map(Enum::toString).collect(Collectors.toList());
-
-        List<Transaction> transactionsByStatus = transactionRepository.findTransactionByTransactionStatusList(enumStatus);
-        return transactionMapper.listTransactionsDTO(transactionsByStatus);
+        return transactionRepository.findTransactionByTransactionStatusList(enumStatus);
 
     }
+
+
 
 }

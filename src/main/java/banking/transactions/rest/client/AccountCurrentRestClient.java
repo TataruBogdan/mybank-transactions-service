@@ -1,6 +1,7 @@
 package banking.transactions.rest.client;
 
 import banking.commons.dto.AccountCurrentDTO;
+import banking.commons.dto.DebitAccountCurrentDTO;
 import banking.transactions.config.ApplicationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -27,15 +28,20 @@ public class AccountCurrentRestClient {
     }
 
     //PATCH mapping in AccountCurrentController -                              requestBody?
+    //http://localhost:8200/accounts-current/
     public ResponseEntity<AccountCurrentDTO> debitAccountCurrent(String iban, Double amount) {
 
-        String body = "{\"fromIban\":\"CURR-\",\"amount\":amount}";
+        //String body = "{\"fromIban\":\"CURR-\",\"amount\":amount}";
+        DebitAccountCurrentDTO debitAccountCurrentDTO = new DebitAccountCurrentDTO();
+        debitAccountCurrentDTO.setDebitAmount(amount);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> requestEntity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<AccountCurrentDTO> accountCurrentFromIbanResponseEntity = currentRestTemplate.exchange("/account-current/debit/" + iban, HttpMethod.PATCH, requestEntity, AccountCurrentDTO.class);
-        return accountCurrentFromIbanResponseEntity;
+        HttpEntity<DebitAccountCurrentDTO> requestEntity = new HttpEntity<>(debitAccountCurrentDTO, headers);
+
+        ResponseEntity<AccountCurrentDTO> accountCurrentDTO = currentRestTemplate.exchange("http://localhost:8200/account-current/debit/" + iban, HttpMethod.PATCH, requestEntity, AccountCurrentDTO.class);
+        return accountCurrentDTO;
     }
 
     public ResponseEntity<AccountCurrentDTO> creditAccountCurrent(String iban, Double amount) {
@@ -44,7 +50,7 @@ public class AccountCurrentRestClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> requestEntity = new HttpEntity<>(body, headers);
-        ResponseEntity<AccountCurrentDTO> accountCurrentToIbanResponseEntity = currentRestTemplate.exchange("/account-current/credit/" + iban,HttpMethod.PATCH, requestEntity, AccountCurrentDTO.class);
+        ResponseEntity<AccountCurrentDTO> accountCurrentToIbanResponseEntity = currentRestTemplate.exchange("http://localhost:8200/account-current/credit/" + iban,HttpMethod.PATCH, requestEntity, AccountCurrentDTO.class);
 
         return accountCurrentToIbanResponseEntity;
     }
