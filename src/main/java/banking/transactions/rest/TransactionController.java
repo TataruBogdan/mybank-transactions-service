@@ -135,15 +135,18 @@ public class TransactionController {
     //??? /transactions/transactionId ? - e ok
     @PatchMapping(value = "/execute/{transactionId}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<TransactionDTO> executeTransaction(@PathVariable("transactionId") String transactionId){
-    //TODO - incarcam TransactionsDTO
+        //TODO - fromIndividualDTO ; tondividualDTO - null !!!
         Optional<TransactionDTO> transactionById = transactionService.getTransactionById(transactionId);
+        IndividualDTO fromIndividualDTO = transactionById.get().getFromIndividualDTO();
+        Integer fromIndividualDTOId = fromIndividualDTO.getId();
+        System.out.println(fromIndividualDTOId);
+        IndividualDTO toIndividualDTO = transactionById.get().getToIndividualDTO();
+
         Double transactionAmount = transactionById.get().getTransactionAmount();
 
         String fromIban = transactionById.get().getFromIban();
         String toIban = transactionById.get().getToIban();
 
-        IndividualDTO fromIndividualDTO = null;
-        IndividualDTO toIndividualDTO = null;
 
         switch (parseTypeStringIban(fromIban)) {
             case CURRENT: {
@@ -160,7 +163,8 @@ public class TransactionController {
 
             //can only make a new deposit that will wait x months to maturation
             case DEPOSIT: {
-                AccountDepositDTO accountDepositByIban = accountDepositRestClient.getAccountDepositByIban(transactionId);
+
+                AccountDepositDTO accountDepositByIban = accountDepositRestClient.getAccountDepositByIban(toIban);
                 int maturityMonths = accountDepositByIban.getMaturityMonths();
                 ResponseEntity<AccountDepositDTO> newAccountDepositForIndividual = accountDepositRestClient.createNewAccountDepositForIndividual(toIndividualDTO, maturityMonths, transactionAmount);
 

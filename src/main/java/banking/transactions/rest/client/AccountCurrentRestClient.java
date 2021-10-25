@@ -1,6 +1,7 @@
 package banking.transactions.rest.client;
 
 import banking.commons.dto.AccountCurrentDTO;
+import banking.commons.dto.CreditAccountCurrentDTO;
 import banking.commons.dto.DebitAccountCurrentDTO;
 import banking.transactions.config.ApplicationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,10 +47,14 @@ public class AccountCurrentRestClient {
 
     public ResponseEntity<AccountCurrentDTO> creditAccountCurrent(String iban, Double amount) {
 
-        String body = "{\"toIban\":\"CURR-\",\"amount\":amount}";
+//        String body = "{\"toIban\":\"CURR-\",\"amount\":amount}";
+        CreditAccountCurrentDTO creditAccountCurrentDTO = new CreditAccountCurrentDTO();
+        creditAccountCurrentDTO.setCreditAmount(amount);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> requestEntity = new HttpEntity<>(body, headers);
+
+        HttpEntity<CreditAccountCurrentDTO> requestEntity = new HttpEntity<>(creditAccountCurrentDTO, headers);
         ResponseEntity<AccountCurrentDTO> accountCurrentToIbanResponseEntity = currentRestTemplate.exchange("http://localhost:8200/account-current/credit/" + iban,HttpMethod.PATCH, requestEntity, AccountCurrentDTO.class);
 
         return accountCurrentToIbanResponseEntity;

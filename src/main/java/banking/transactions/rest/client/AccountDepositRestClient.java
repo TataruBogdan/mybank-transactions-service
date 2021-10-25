@@ -49,6 +49,4 @@ public class AccountDepositRestClient {
 
         return ResponseEntity.of(Optional.of(accountDepositDTO));
     }
-
-
 }
