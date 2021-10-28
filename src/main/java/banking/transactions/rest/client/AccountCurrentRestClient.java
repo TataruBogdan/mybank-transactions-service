@@ -34,7 +34,7 @@ public class AccountCurrentRestClient {
 
         //String body = "{\"fromIban\":\"CURR-\",\"amount\":amount}";
         DebitAccountCurrentDTO debitAccountCurrentDTO = new DebitAccountCurrentDTO();
-        debitAccountCurrentDTO.setDebitAmount(amount);
+        debitAccountCurrentDTO.setAmount(amount);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -49,7 +49,7 @@ public class AccountCurrentRestClient {
 
 //        String body = "{\"toIban\":\"CURR-\",\"amount\":amount}";
         CreditAccountCurrentDTO creditAccountCurrentDTO = new CreditAccountCurrentDTO();
-        creditAccountCurrentDTO.setCreditAmount(amount);
+        creditAccountCurrentDTO.setAmount(amount);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

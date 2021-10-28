@@ -2,7 +2,7 @@ package banking.transactions.rest.client;
 
 import banking.commons.dto.AccountDepositDTO;
 import banking.commons.dto.IndividualDTO;
-import banking.commons.dto.types.ArgsDTO;
+import banking.commons.dto.ArgsDTO;
 import banking.transactions.config.ApplicationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
